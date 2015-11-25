@@ -1,6 +1,8 @@
 package com.github.yongchristophertang.demo.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import javax.persistence.*;
 import java.util.List;
@@ -91,12 +93,17 @@ public class Person {
 
     @Override
     public String toString() {
-        return "Person{" +
-            "name='" + name + '\'' +
-            ", id=" + id +
-            ", address='" + address + '\'' +
-            ", phone='" + phone + '\'' +
-            '}';
+        try {
+            return new ObjectMapper().writeValueAsString(this);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+            return "Person{" +
+                    "name='" + name + '\'' +
+                    ", id=" + id +
+                    ", address='" + address + '\'' +
+                    ", phone='" + phone + '\'' +
+                    '}';
+        }
     }
 
     public Long getId() {

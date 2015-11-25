@@ -12,6 +12,7 @@ import com.github.yongchristophertang.engine.web.request.RequestBuilder;
  * @since 0.1
  */
 @Host(value = "localhost", port = 8080)
+@Path("/demo")
 public interface PersonServiceApi {
 
     @POST
@@ -22,6 +23,10 @@ public interface PersonServiceApi {
     @GET
     @Path("/person/{id}")
     RequestBuilder readPerson(@PathParam("id") Long id);
+
+    @GET
+    @Path("/person")
+    RequestBuilder readPerson(@QueryParam("name") String name);
 
     @PUT
     @Path("/person/{id}")

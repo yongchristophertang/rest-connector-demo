@@ -8,6 +8,7 @@ import com.github.yongchristophertang.engine.web.WebTemplate;
 import com.github.yongchristophertang.engine.web.WebTemplateBuilder;
 import com.google.inject.Inject;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Guice;
 import org.testng.annotations.Test;
@@ -28,7 +29,7 @@ import static com.github.yongchristophertang.engine.web.response.HttpResultMatch
  * @since 0.1
  */
 @Guice(moduleFactory = TestNGDBInjectionModuleFactory.class)
-@SqlDB(url="jdbc:mysql://localhost:3306/persondb", userName = "root", password = "")
+@SqlDB(url="jdbc:mysql://localhost:3306/persondb", userName = "demo", password = "demopwd")
 public class Demo2DatabaseOperations extends DemoApplication {
     private JdbcTemplate jdbcTemplate;
     private WebTemplate webTemplate = WebTemplateBuilder.customConfig().alwaysDo(print()).build();
@@ -42,11 +43,16 @@ public class Demo2DatabaseOperations extends DemoApplication {
         jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
+    @AfterClass
+    public void shutDownService() {
+        stopDemoService();
+    }
+
     @Test
     public void testJdbcOperations() throws Exception {
         webTemplate.perform(api(PersonServiceApi.class)
             .createPerson(
-                new Person("Benjamin Alcoste", "334 Bay view st., Ottawa, ON, Canada", Arrays.asList("613-560-7777"))));
+                new Person("Benjamin Harper", "334 Bay view st., Ottawa, ON, Canada", Arrays.asList("613-560-7777"))));
         jdbcTemplate.execute("UPDATE person SET name='Jason Elsa' WHERE id=2");
         webTemplate.perform(api(PersonServiceApi.class).readPerson(2L)).andExpect(jsonPath("$.name", "Jason Elsa"));
     }

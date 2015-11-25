@@ -7,33 +7,24 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
 
 /**
- * Web service controller
+ * Web service controller using mysql database repository
  *
  * @author Yong Tang
  * @since 0.1
  */
 @RestController
+@RequestMapping("/demo")
 public class DemoController {
-    /**
-     * Mimic a persistence of persons
-     */
-    static final Set<Person> persistPersons = new CopyOnWriteArraySet<>();
-    private static final Function<Long, Person> lookupPerson =
-        id -> persistPersons.parallelStream().filter(p -> p.getId() == id).findFirst()
-            .orElseThrow(() -> new PersonNotFoundException(id));
-    /**
-     * Internal deterministic person id
-     */
-    static AtomicInteger id = new AtomicInteger();
+
+
+    private final PersonRepository personRepository;
 
     @Autowired
-    private PersonRepository personRepository;
+    public DemoController(PersonRepository personRepository) {
+        this.personRepository = personRepository;
+    }
 
     /**
      * GET a person
@@ -43,7 +34,6 @@ public class DemoController {
      */
     @RequestMapping("/person/{id}")
     public Person getPerson(@PathVariable("id") long id) {
-//        return lookupPerson.apply(id);
         return personRepository.findById(id).orElseThrow(() -> new PersonNotFoundException(id));
     }
 
@@ -55,15 +45,22 @@ public class DemoController {
      */
     @RequestMapping(value = "/persons", method = RequestMethod.POST, consumes = "application/json")
     public Person storePerson(@RequestBody Person person) {
-//        person.setId(id.incrementAndGet());
-//        persistPersons.add(person);
         return personRepository.save(person);
-//        return person.getId();
     }
 
+    /**
+     * Get persons by name.
+     *
+     * @param name the person's name
+     * @return list of person with the request name
+     */
     @RequestMapping("/person")
     public List<Person> getPersonByName(@RequestParam(value = "name",required = true) String name) {
-        return personRepository.findByName(name);
+        List<Person> persons = personRepository.findByName(name);
+        if (persons.size() == 0) {
+            throw new PersonNotFoundException(name);
+        }
+        return persons;
     }
 
     /**
@@ -74,8 +71,6 @@ public class DemoController {
      */
     @RequestMapping(value = "/person/{id}", method = RequestMethod.DELETE)
     public Person deletePerson(@PathVariable("id") long id) {
-//        Person person = lookupPerson.apply(id);
-//        persistPersons.remove(person);
         return personRepository.findAndDeleteById(id).orElseThrow(() -> new PersonNotFoundException(id));
     }
 
@@ -88,12 +83,6 @@ public class DemoController {
      */
     @RequestMapping(value = "/person/{id}", method = RequestMethod.PUT)
     public Person updatePerson(@PathVariable("id") long id, @RequestBody(required = false) Person personUpdate) {
-//        Person person = lookupPerson.apply(id);
-//        if (personUpdate != null) {
-//            personUpdate.setId(person.getId());
-//            persistPersons.remove(person);
-//            persistPersons.add(personUpdate);
-//        }
         personUpdate.setId(id);
         return personRepository.save(personUpdate);
     }
@@ -102,7 +91,12 @@ public class DemoController {
     static class PersonNotFoundException extends RuntimeException {
 
         public PersonNotFoundException(long id) {
-            super("could not find person '" + id + "'.");
+            super("could not find person with id '" + id + "'.");
+        }
+
+        public PersonNotFoundException(String name) {
+            super("could not find person with name '" + name + "'.");
         }
     }
+
 }

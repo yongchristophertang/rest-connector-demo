@@ -20,7 +20,7 @@ public class DemoApplication {
 
     @Bean
     public CommandLineRunner init(PersonRepository personRepository) {
-        return evt -> personRepository.save(new Person("Will O'Corner", "356 Henderson Pvt., Markham, ON, Canada",
+        return event -> personRepository.save(new Person("Will O'Corner", "356 Henderson Pvt., Markham, ON, Canada",
             Arrays.asList("512-780-2257", "553-780-4889")));
     }
 
