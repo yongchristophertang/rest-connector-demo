@@ -21,13 +21,13 @@ public interface PersonServiceApi {
 
     @GET
     @Path("/person/{id}")
-    RequestBuilder readPerson(@PathParam("id") String id);
+    RequestBuilder readPerson(@PathParam("id") Long id);
 
     @PUT
     @Path("/person/{id}")
-    RequestBuilder updatePerson(@PathParam("id") String id, @BodyParam String updateName);
+    RequestBuilder updatePerson(@PathParam("id") Long id, @BodyParam String updateName);
 
     @DELETE
     @Path("person/{id}")
-    RequestBuilder deletePerson(@PathParam("id") String id);
+    RequestBuilder deletePerson(@PathParam("id") Long id);
 }
